@@ -1,28 +1,77 @@
 # 演算法機測分析
-# 學號:10727158
-# 姓名:黃凱得
+# 學號10727158
+# 姓名黃凱得
 # 中原大學資訊工程學系
 
-class AdjMatrix :
-	def __init__( self, numOfVertex, source ) :
-		self.source = source
-		self.matrix = [[-1 for i in range( numOfVertex )] for j in range(numOfVertex)]
+INFINITY = 1e30
+
+class Vertex :
+	def __init__( self, num ) :
+		self.num = num 
+		self.visted = False 
+		
+class AdjMatrix : 
+	def __init__( self, numOfVertex, edges, source ) :
+		self.numOfVertex = numOfVertex
+		self.edges = edges 
+		self.matrix = [[0 for i in range( numOfVertex )] for j in range(numOfVertex)]
+		
+		self.d = [ 0 for i in range( numOfVertex ) ]
+		self.pi = [ 0 for i in range( numOfVertex ) ]
 		
 	def AddEdge( self, source, goal, weight ) :
-		self.matrix[source][goal] = weight 
-  
+		if ( source >= 1 and source <= self.numOfVertex and
+			goal >= 1 and goal <= self.numOfVertex ) :
+			if ( self.matrix[source-1][goal-1] == 0 ) :
+				self.matrix[source-1][goal-1] = weight 
+				
+	def Dijkstra( self, source ):
+		source -= 1 
+		# Initialization
+		for i in range( 0, self.numOfVertex  ):
+			self.d[i] = INFINITY
+		self.d[source] = 0
+		self.pi[source] = 0
+
+		set = [True] * ( self.numOfVertex )
+
+		n = self.numOfVertex
+		while ( n != 0 ):
+			# Extract Minimum
+			u = 0
+			min = INFINITY
+			for i in range( 0, self.numOfVertex ):
+				if ( set[i] and self.d[i] < min ):
+					u = i
+					min = self.d[i]
+			set[u] = False
+			n -= 1
+
+			# Relax
+			for v in range( 0, self.numOfVertex ):
+				if ( self.matrix[u][v] != 0 ):
+					if ( self.d[v] > self.d[u] + self.matrix[u][v] ):
+						self.d[v] = self.d[u] + self.matrix[u][v]
+						self.pi[v] = u
+
+		print( "Dijkstra Algorithm:" )
+		for i in range( 0, self.numOfVertex ):
+			if self.d[i] != 1e+30 and self.d[i] != 0 :
+				print( source+1, "to", i+1, "=", self.d[i] )
+ 
 if __name__ == '__main__' :
 	numOfVertex = int( input() ) 
 	numOfEdges = int( input() ) 
 	sourceVertex = int( input() )  
-	adjMatrix = AdjMatrix( numOfVertex, sourceVertex )
+	adjMatrix = AdjMatrix( numOfVertex, numOfEdges, sourceVertex )
 
+	# build adjancy matrix
 	while True :
 		input_list = input().split()
 		if input_list[0] == '0' :
 			break
 		
-		adjMatrix.AddEdge( int( input_list[0] )-1, int( input_list[1] )-1, int( input_list[2] )-1 )
-		print( adjMatrix.matrix )
-		
-		
+		adjMatrix.AddEdge( int( input_list[0] ), int( input_list[1] ), int( input_list[2] ) )
+	
+	adjMatrix.Dijkstra( sourceVertex )
+	
